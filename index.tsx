@@ -2,6 +2,63 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: 20, 
+          color: '#721c24', 
+          backgroundColor: '#f8d7da', 
+          fontFamily: 'sans-serif',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <h1 style={{fontSize: '24px', marginBottom: '10px'}}>Something went wrong</h1>
+          <p>Please try refreshing the page.</p>
+          <pre style={{
+            marginTop: '20px', 
+            fontSize: '12px', 
+            textAlign: 'left', 
+            backgroundColor: '#fff', 
+            padding: '10px', 
+            borderRadius: '5px',
+            maxWidth: '90%',
+            overflow: 'auto'
+          }}>
+            {this.state.error?.toString()}
+          </pre>
+          <button 
+            onClick={() => { localStorage.clear(); window.location.reload(); }}
+            style={{marginTop: '20px', padding: '10px 20px', background: '#d9534f', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold'}}
+          >
+            Clear Data & Reset
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
@@ -10,6 +67,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
